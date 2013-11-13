@@ -49,12 +49,12 @@ function createIcon(data) {
 		sub.style.top = calc(value.y, 0);
 		sub.style.width = calc(value.w, 10);
 		sub.style.height = calc(value.h, 10);
-		
+
 		if (selected) {
-			sub.style.backgroundImage = 'url('+ (selected.favIconUrl?selected.favIconUrl:'favicon.png')+')';
+			if (selected.favIconUrl) {
+				sub.style.backgroundImage = 'url('+ selected.favIconUrl +')';
+			}
 			sub.setAttribute('title', selected.title);
-		} else {
-			sub.style.backgroundImage = 'url(favicon.png)';
 		}
 
 		element.appendChild(sub);
@@ -113,16 +113,18 @@ function getClosest(object, options) {
 /**
  * places the windows based off the given data
  */
-function setWindows(datas) {
+function setWindows(data) {
 	var width = screen.width;
 	var height = screen.availHeight;
 
-	datas.each(function(key, value) {
+	data.each(function(key, value) {
 		updateWindow(value.window, {
 			'left': Math.floor(width * value.x),
 			'top': Math.floor(height * value.y) + (value.y?23:0),
 			'width': Math.floor(width * value.w),
-			'height': Math.floor(height * value.h)
+			'height': Math.floor(height * value.h),
+			'focused': true,
+			'state': 'normal'
 		})
 	});
 }
