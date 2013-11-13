@@ -7,39 +7,55 @@
 				padding: 0px;
 				margin: 0px;
 			}
-			body {
+
+			#header {
+				width: 100%;
+			}
+				.button {
+					width: calc(100% / 6 - 1px);
+					background: rgb(200,200,200);
+					height: 30px;
+					border: solid 1px gray;
+					border-right: none;
+					border-top: none;
+					border-radius: 0px 0px 3px 3px;
+					float:left;
+
+				}
+
+			#content {
 				width: 280px;
 				max-height: 280px;
 				overflow-x:scroll;
 				margin: 5px;
 			}
-			.window {
-				width: 130px;
-				height: 130px;
-				margin: 5px;
-				background-color: rgb(240,240,240);
-				border-radius: 6px;
-				float: left;
-				cursor: pointer;
-				position: relative;
-			}
-			.window:hover {
-				background-color: rgb(220,220,220);
-			}
-			.window:nth-child(2n + 1){
-				clear:right;
-			}
-
-				.window .sub {
-					background-color: rgb(200,200,200);
-					border-radius: 6px;
+				.window {
+					width: 130px;
+					height: 130px;
 					margin: 5px;
-					position: absolute;
-					background-repeat: no-repeat;
-					background-position: 5px 5px;
-					background-size: 20px 20px;
-					background-image: url(favicon.png);
+					background-color: rgb(240,240,240);
+					border-radius: 6px;
+					float: left;
+					cursor: pointer;
+					position: relative;
 				}
+				.window:hover {
+					background-color: rgb(220,220,220);
+				}
+				.window:nth-child(2n + 1){
+					clear:right;
+				}
+
+					.window .sub {
+						background-color: rgb(200,200,200);
+						border-radius: 6px;
+						margin: 5px;
+						position: absolute;
+						background-repeat: no-repeat;
+						background-position: 5px 5px;
+						background-size: 20px 20px;
+						background-image: url(favicon.png);
+					}
 		</style>
 
 		<!--
@@ -52,6 +68,8 @@
 		<script src="popup.js"></script>
 	</head>
 	<body>
-		
+		<div id="content">
+
+		</div>
 	</body>
 </html>

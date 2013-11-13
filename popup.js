@@ -7,6 +7,17 @@ function updateWindow(window, data) {
 	chrome.windows.update(window.id, data);
 }
 
+function getSelectedTab(win) {
+	var selected = win.tabs.filter(function(tab) {
+		return tab.selected;
+	});
+	if (selected.length > 0) {
+		return selected[0];
+	} else {
+		return null;
+	}
+}
+
 Array.prototype.each = function(callback, context) {
 	for (var i = 0; i < this.length; i++) {
 		callback.call(context, i, this[i]);
@@ -23,6 +34,8 @@ Object.prototype.each = function(callback, context) {
 	}
 }
 
+
+
 /**
  * Creates and returns a window icon with proper handling
  */
@@ -35,20 +48,14 @@ function createIcon(data) {
 	element.classList.add('window');
 
 	data.each(function(key, value) {
-		var selected = null;
-		for (var i = 0; i < value.window.tabs.length; i++) {
-			if (value.window.tabs[i].selected) {
-				selected = value.window.tabs[i];
-				break;
-			}
-		}
-
 		var sub = document.createElement('div');
 		sub.classList.add('sub');
 		sub.style.left = calc(value.x, 0);
 		sub.style.top = calc(value.y, 0);
 		sub.style.width = calc(value.w, 10);
 		sub.style.height = calc(value.h, 10);
+
+		var selected = getSelectedTab(value.window);
 
 		if (selected) {
 			if (selected.favIconUrl) {
@@ -122,7 +129,7 @@ function setWindows(data) {
 			'left': Math.floor(width * value.x),
 			'top': Math.floor(height * value.y) + (value.y?23:0),
 			'width': Math.floor(width * value.w),
-			'height': Math.floor(height * value.h),
+			'height': Math.floor(height * value.h) - (value.y?23:0),
 			'focused': true,
 			'state': 'normal'
 		})
@@ -143,7 +150,7 @@ function fillBody() {
 		// for each window layout
 		options[windows.length].each(function(key, value) {
 
-			// make a copy so we can remove used ones per icon
+			// make a copy so we can remove used ones for every icon
 			tempWindows = windows.slice(0);
 
 			// for every sub window of a layout TODO: .each?

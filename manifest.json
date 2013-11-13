@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "Resizr",
+  "name": "Window Tiler",
   "description": "Quickly tile your windows.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "permissions": ["tabs"],
   "browser_action": {
     "default_icon": "icon.png",
