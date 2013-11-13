@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+
+  "name": "Resizr",
+  "description": "Quickly tile your windows.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  }
+}

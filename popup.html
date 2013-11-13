@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Getting Started Extension's Popup</title>
+		<style>
+			* {
+				padding: 0px;
+				margin: 0px;
+			}
+			body {
+				width: 280px;
+				margin: 5px;
+			}
+			.window {
+				width: 130px;
+				height: 130px;
+				margin: 5px;
+				background-color: rgb(240,240,240);
+				border-radius: 6px;
+				float: left;
+				cursor: pointer;
+				position: relative;
+			}
+			.window:hover {
+				background-color: rgb(220,220,220);
+			}
+			.window:nth-child(2n + 1){
+				clear:right;
+			}
+
+				.window .sub {
+					background-color: rgb(200,200,200);
+					border-radius: 6px;
+					margin: 5px;
+					position: absolute;
+				}
+		</style>
+
+		<!--
+			- JavaScript and HTML must be in separate files: see our Content Security
+			- Policy documentation[1] for details and explanation.
+			-
+			- [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
+		 -->
+		<script src="options.json"></script>
+		<script src="popup.js"></script>
+	</head>
+	<body>
+		
+	</body>
+</html>
