@@ -1,6 +1,6 @@
 /************ SHORT CUTS & PROTOTYPES ***************/
 function getWindows(callback) {
-	chrome.windows.getAll(null, callback);
+	chrome.windows.getAll({'populate': true}, callback);
 }
 
 function updateWindow(window, data) {
@@ -35,12 +35,28 @@ function createIcon(data) {
 	element.classList.add('window');
 
 	data.each(function(key, value) {
+		var selected = null;
+		for (var i = 0; i < value.window.tabs.length; i++) {
+			if (value.window.tabs[i].selected) {
+				selected = value.window.tabs[i];
+				break;
+			}
+		}
+
 		var sub = document.createElement('div');
 		sub.classList.add('sub');
 		sub.style.left = calc(value.x, 0);
 		sub.style.top = calc(value.y, 0);
 		sub.style.width = calc(value.w, 10);
 		sub.style.height = calc(value.h, 10);
+		
+		if (selected) {
+			sub.style.backgroundImage = 'url('+ (selected.favIconUrl?selected.favIconUrl:'favicon.png')+')';
+			sub.setAttribute('title', selected.title);
+		} else {
+			sub.style.backgroundImage = 'url(favicon.png)';
+		}
+
 		element.appendChild(sub);
 	});
 
@@ -101,25 +117,13 @@ function setWindows(datas) {
 	var width = screen.width;
 	var height = screen.availHeight;
 
-	data = [];
 	datas.each(function(key, value) {
-		defineCenter(value);
-		data.push(value);
-	});
-
-	getWindows(function(windows) {
-
-		windows.each(function(i, value) {
-			defineCenter(value);
-			var closest = getClosest(value, data);
-			data.remove(closest);
-			updateWindow(value, {
-				'left': Math.floor(width * closest.x),
-				'top': Math.floor(height * closest.y),
-				'width': Math.floor(width * closest.w),
-				'height': Math.floor(height * closest.h)
-			});
-		});
+		updateWindow(value.window, {
+			'left': Math.floor(width * value.x),
+			'top': Math.floor(height * value.y) + (value.y?23:0),
+			'width': Math.floor(width * value.w),
+			'height': Math.floor(height * value.h)
+		})
 	});
 }
 
@@ -128,7 +132,29 @@ function setWindows(datas) {
  */
 function fillBody() {
 	getWindows(function(windows) {
+
+		// make sure each window has it's center point defined
+		windows.each(function(key,value) {
+			defineCenter(value);
+		});
+
+		// for each window layout
 		options[windows.length].each(function(key, value) {
+
+			// make a copy so we can remove used ones per icon
+			tempWindows = windows.slice(0);
+
+			// for every sub window of a layout TODO: .each?
+			for (var i = 0; i < value.length; i++) {
+				
+				// get closest window to center position and save it
+				defineCenter(value[i]);
+				var closest = getClosest(value[i], tempWindows);
+				tempWindows.remove(closest);
+				value[i].window = closest;
+			}
+
+			// add icon to body
 			document.body.appendChild(createIcon(value));
 		});
 	});
