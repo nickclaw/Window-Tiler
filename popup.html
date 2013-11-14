@@ -1,72 +1,12 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Getting Started Extension's Popup</title>
-		<style>
-			* {
-				padding: 0px;
-				margin: 0px;
-			}
-
-			#header {
-				width: 100%;
-			}
-				.button {
-					width: calc(100% / 6 - 1px);
-					background: rgb(200,200,200);
-					height: 30px;
-					border: solid 1px gray;
-					border-right: none;
-					border-top: none;
-					border-radius: 0px 0px 3px 3px;
-					float:left;
-
-				}
-
-			#content {
-				width: 280px;
-				max-height: 280px;
-				min-height: 280px; /* I shouldn't have to set this, but sometimes the popup doesn't size fast enough */
-				overflow-x:scroll;
-				margin: 5px;
-			}
-				.window {
-					width: 130px;
-					height: 130px;
-					margin: 5px;
-					background-color: rgb(240,240,240);
-					border-radius: 6px;
-					float: right;
-					cursor: pointer;
-					position: relative;
-				}
-				.window:hover {
-					background-color: rgb(220,220,220);
-				}
-				.window:nth-child(2n + 1){
-					clear:left;
-				}
-
-					.window .sub {
-						background-color: rgb(200,200,200);
-						border-radius: 6px;
-						margin: 5px;
-						position: absolute;
-						background-repeat: no-repeat;
-						background-position: 5px 5px;
-						background-size: 20px 20px;
-						background-image: url(favicon.png);
-					}
-		</style>
-
-		<!--
-			- JavaScript and HTML must be in separate files: see our Content Security
-			- Policy documentation[1] for details and explanation.
-			-
-			- [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
-		 -->
+		<title>Window Resizer</title>
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<script src="js/prototypes.js"></script>
+		<script src="js/utilities.js"></script>
 		<script src="options.json"></script>
-		<script src="popup.js"></script>
+		<script src="js/popup.js"></script>
 	</head>
 	<body>
 		<div id="content">

@@ -1,4 +1,7 @@
-/************ SHORT CUTS & PROTOTYPES ***************/
+/************** SHORTCUTS ***************/
+/**
+ * retrieves all the windows, passes them to callback
+ */
 function getWindows(callback) {
 	chrome.windows.getAll({'populate': true}, function(windows) {
 		windows.each(function(key, value) {
@@ -7,18 +10,33 @@ function getWindows(callback) {
 		callback(windows);
 	});
 }
+/** 
+ * updates a window
+ */
 function updateWindow(window, data) {
 	chrome.windows.update(window.id, data);
 }
+
+/**
+ * retrieves all screens, passes them to callback
+ */
 function getScreens(callback) {
 	chrome.system.display.getInfo(callback);
 }
+
+/** 
+ * retrieves the currentlly selected window, passes it to callback
+ */
 function getCurrentWindow(callback) {
 	chrome.windows.getCurrent({'populate': true}, function(currentWindow) {
 		defineCenter(currentWindow);
 		callback(currentWindow);
 	});
 }
+
+/**
+ * finds the screen holding targetWindow, passes it to callback
+ */
 function getScreen(targetWindow, callback) {
 	getScreens(function(screens) {
 		var currentScreen = null;
@@ -30,10 +48,10 @@ function getScreen(targetWindow, callback) {
 		callback(currentScreen);
 	});
 }
-function inBounds(point, bounds) {
-	return 	( (point.x > bounds.left) && (point.x < bounds.left + bounds.width ) ) && 	// horizontal
-			( (point.y > bounds.top ) && (point.y < bounds.top  + bounds.height) );		// vertical
-}
+
+/**
+ * finds the windows that belong in a screen, passes them to a callback
+ */
 function getScreenWindows(screen, callback) {
 	getWindows(function(windows) {
 		screenWindows = [];
@@ -45,6 +63,10 @@ function getScreenWindows(screen, callback) {
 		callback(screenWindows);
 	});
 }
+
+/**
+ * finds the windows that are in the current screen, passes them to a callback
+ */
 function getCurrentWindows(callback) {
 	getCurrentWindow(function(win){
 	    getScreen(win, function(scr){
@@ -55,6 +77,9 @@ function getCurrentWindows(callback) {
 	});
 }
 
+/** 
+ * returns the tab with focus in a window
+ */
 function getSelectedTab(targetWindow) {
 	var selected = targetWindow.tabs.filter(function(tab) {
 		return tab.selected;
@@ -66,23 +91,31 @@ function getSelectedTab(targetWindow) {
 	}
 }
 
-Array.prototype.each = function(callback, context) {
-	for (var i = 0; i < this.length; i++) {
-		callback.call(context, i, this[i]);
-	}
-}
-Array.prototype.remove = function(object) {
-	return this.splice(this.indexOf(object), 1);
-}
-Object.prototype.each = function(callback, context) {
-	for (key in this) {
-		if (this.hasOwnProperty(key)) {
-			callback.call(context, key, this[key]);
+/**
+ * returns the closest option to the object, all objects/options must have center
+ * object = object
+ * options = array
+ */
+function getClosest(object, options) {
+	var closestObject = null;
+	var closestDistance = Number.MAX_VALUE;
+
+	options.each(function(key, value) {
+		var distance = getDistance(object.center, value.center);
+		if (distance < closestDistance) {
+			closestDistance = distance;
+			closestObject = value;
 		}
-	}
+	});
+	return closestObject;
 }
 
 
+
+
+
+
+/****************** OTHER FUNCTIONS ******************/
 
 /**
  * Creates and returns a window icon with proper handling
@@ -121,48 +154,6 @@ function createIcon(data) {
 	});
 
 	return element;
-}
-
-/**
- * find the center of an object and sets it as a property of the object
- */
-function defineCenter(data) {
-	var width = screen.width;
-	var height = screen.availHeight;
-
-	var x = data.x === undefined? data.left : data.x * width;
-	var y = data.y === undefined? data.top : data.y * height;
-	var w = data.w === undefined? data.width : data.w * width;
-	var h = data.h === undefined? data.height : data.h * height;
-
-	data.center = {
-		'x': x + w/2,
-		'y': y + h/2
-	}
-}
-
-/**
- * returns the distance between two points
- */
-function getDistance(a,b) {
-	return Math.sqrt(Math.pow(a.x - b.x,2) + Math.pow(a.y - b.y,2));
-}
-
-/**
- * returns the closest option to the object
- */
-function getClosest(object, options) {
-	var closestObject = null;
-	var closestDistance = Number.MAX_VALUE;
-
-	options.each(function(key, value) {
-		var distance = getDistance(object.center, value.center);
-		if (distance < closestDistance) {
-			closestDistance = distance;
-			closestObject = value;
-		}
-	});
-	return closestObject;
 }
 
 /**
@@ -216,6 +207,7 @@ function fillBody() {
 	});
 }
 
+// init
 document.addEventListener('DOMContentLoaded', function () {
 	fillBody();
 });
