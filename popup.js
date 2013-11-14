@@ -1,14 +1,62 @@
 /************ SHORT CUTS & PROTOTYPES ***************/
 function getWindows(callback) {
-	chrome.windows.getAll({'populate': true}, callback);
+	chrome.windows.getAll({'populate': true}, function(windows) {
+		windows.each(function(key, value) {
+			defineCenter(value);
+		});
+		callback(windows);
+	});
 }
-
 function updateWindow(window, data) {
 	chrome.windows.update(window.id, data);
 }
+function getScreens(callback) {
+	chrome.system.display.getInfo(callback);
+}
+function getCurrentWindow(callback) {
+	chrome.windows.getCurrent({'populate': true}, function(currentWindow) {
+		defineCenter(currentWindow);
+		callback(currentWindow);
+	});
+}
+function getScreen(targetWindow, callback) {
+	getScreens(function(screens) {
+		var currentScreen = null;
+		screens.each(function(key, value) {
+			if (inBounds(targetWindow.center, value.bounds)) {
+				currentScreen = value;
+			}
+		});
+		callback(currentScreen);
+	});
+}
+function inBounds(point, bounds) {
+	return 	( (point.x > bounds.left) && (point.x < bounds.left + bounds.width ) ) && 	// horizontal
+			( (point.y > bounds.top ) && (point.y < bounds.top  + bounds.height) );		// vertical
+}
+function getScreenWindows(screen, callback) {
+	getWindows(function(windows) {
+		screenWindows = [];
+		windows.each(function(key, value) {
+			if (inBounds(value.center, screen.bounds)) {
+				screenWindows.push(value);
+			}
+		});
+		callback(screenWindows);
+	});
+}
+function getCurrentWindows(callback) {
+	getCurrentWindow(function(win){
+	    getScreen(win, function(scr){
+	        getScreenWindows(scr, function(windows) {
+	        	callback(windows);
+	        }); 
+	    });
+	});
+}
 
-function getSelectedTab(win) {
-	var selected = win.tabs.filter(function(tab) {
+function getSelectedTab(targetWindow) {
+	var selected = targetWindow.tabs.filter(function(tab) {
 		return tab.selected;
 	});
 	if (selected.length > 0) {
@@ -131,7 +179,6 @@ function setWindows(data) {
 			'width': Math.floor(width * value.w),
 			'height': Math.floor(height * value.h) - (value.y?23:0),
 			'focused': true,
-			'state': 'normal'
 		})
 	});
 }
@@ -140,31 +187,29 @@ function setWindows(data) {
  * fills the body with the right type of window icons
  */
 function fillBody() {
-	getWindows(function(windows) {
+	var box = document.getElementById('content');
 
-		// make sure each window has it's center point defined
-		windows.each(function(key,value) {
-			defineCenter(value);
-		});
+	// get all windows on the current screen
+	getCurrentWindows(function(windows) {
 
 		// for each window layout
-		options[windows.length].each(function(key, value) {
+		options[windows.length].each(function(index, layoutOptions) {
 
 			// make a copy so we can remove used ones for every icon
 			tempWindows = windows.slice(0);
 
 			// for every sub window of a layout TODO: .each?
-			for (var i = 0; i < value.length; i++) {
+			for (var i = 0; i < layoutOptions.length; i++) {
 				
 				// get closest window to center position and save it
-				defineCenter(value[i]);
-				var closest = getClosest(value[i], tempWindows);
+				defineCenter(layoutOptions[i]);
+				var closest = getClosest(layoutOptions[i], tempWindows);
 				tempWindows.remove(closest);
-				value[i].window = closest;
+				layoutOptions[i].window = closest;
 			}
 
 			// add icon to body
-			document.body.appendChild(createIcon(value));
+			box.appendChild(createIcon(layoutOptions));
 		});
 	});
 }
