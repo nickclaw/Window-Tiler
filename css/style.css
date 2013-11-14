@@ -3,21 +3,6 @@
 	margin: 0px;
 }
 
-#header {
-	width: 100%;
-}
-	.button {
-		width: calc(100% / 6 - 1px);
-		background: rgb(200,200,200);
-		height: 30px;
-		border: solid 1px gray;
-		border-right: none;
-		border-top: none;
-		border-radius: 0px 0px 3px 3px;
-		float:left;
-
-	}
-
 #content {
 	width: 280px;
 	max-height: 280px;
@@ -43,7 +28,7 @@
 	}
 
 		.window .sub {
-			background-color: rgb(200,200,200);
+			background-color: rgba(100,100,100, .6);
 			border-radius: 6px;
 			margin: 5px;
 			position: absolute;
