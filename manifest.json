@@ -3,7 +3,7 @@
 
   "name": "Window Tiler",
   "description": "Quickly tile your windows.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "permissions": ["tabs", "system.display"],
   "browser_action": {
     "default_icon": "icon.png",

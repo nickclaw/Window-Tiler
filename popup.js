@@ -169,15 +169,17 @@ function getClosest(object, options) {
  * places the windows based off the given data
  */
 function setWindows(data) {
-	var width = screen.width;
+	var top = screen.availTop;
+	var left = screen.availLeft;
+	var width = screen.availWidth;
 	var height = screen.availHeight;
 
 	data.each(function(key, value) {
 		updateWindow(value.window, {
-			'left': Math.floor(width * value.x),
-			'top': Math.floor(height * value.y) + (value.y?23:0),
+			'left': Math.floor(width * value.x) + left,
+			'top': Math.floor(height * value.y) + top,
 			'width': Math.floor(width * value.w),
-			'height': Math.floor(height * value.h) - (value.y?23:0),
+			'height': Math.floor(height * value.h),
 			'focused': true,
 		})
 	});
