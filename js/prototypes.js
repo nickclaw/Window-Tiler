@@ -6,7 +6,8 @@
  */
 Array.prototype.each = function(callback, scope) {
 	for (var i = 0; i < this.length; i++) {
-		callback.call(scope, i, this[i]);
+		if (callback.call(scope, i, this[i]) === false)
+			break;
 	}
 }
 
@@ -24,7 +25,8 @@ Array.prototype.remove = function(object) {
 Object.prototype.each = function(callback, scope) {
 	for (key in this) {
 		if (this.hasOwnProperty(key)) {
-			callback.call(scope, key, this[key]);
+			if (callback.call(scope, key, this[key]) === false)
+				break;
 		}
 	}
 }

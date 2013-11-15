@@ -3,12 +3,15 @@
 	margin: 0px;
 }
 
+::-webkit-scrollbar {
+	display:none;
+}
+
 #content {
 	width: 280px;
-	max-height: 280px;
-	min-height: 280px; /* I shouldn't have to set this, but sometimes the popup doesn't size fast enough */
-	overflow-x:scroll;
+	height: 280px;
 	margin: 5px;
+	overflow-x:scroll;
 }
 	.window {
 		width: 130px;
@@ -37,3 +40,26 @@
 			background-size: 20px 20px;
 			background-image: url(../image/favicon.png);
 		}
+
+#content.error {
+	margin:10px;
+	font-family: sans-serif;
+}
+
+	#content.error h2 {
+		text-align: center;
+		font-size: 35pt;
+	}
+
+	#content.error .window {
+		margin: 20px auto 20px auto;
+		text-align:center;
+		font-size: 120px;
+		color: rgba(64,64,64,.6);
+		float:none;
+	}
+
+	#content.error p {
+		padding: 10px;
+		text-align:center;
+	}

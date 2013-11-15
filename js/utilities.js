@@ -35,3 +35,22 @@ function defineCenter(object) {
 function getDistance(a,b) {
 	return Math.sqrt(Math.pow(a.x - b.x,2) + Math.pow(a.y - b.y,2));
 }
+
+/**
+ * returns the closest option to the object, all objects/options must have center defined
+ * object = object
+ * options = array of objects
+ */
+function getClosest(object, options) {
+	var closestObject = null;
+	var closestDistance = Number.MAX_VALUE;
+
+	options.each(function(key, value) {
+		var distance = getDistance(object.center, value.center);
+		if (distance < closestDistance) {
+			closestDistance = distance;
+			closestObject = value;
+		}
+	});
+	return closestObject;
+}
