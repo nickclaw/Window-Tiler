@@ -14,23 +14,23 @@
 		width: 130px;
 		height: 130px;
 		margin: 5px;
-		background-color: rgb(240,240,240);
+		background-color: rgb(220,220,220);
 		border-radius: 6px;
 		float: right;
 		cursor: pointer;
 		position: relative;
 	}
 	.window:hover {
-		background-color: rgb(220,220,220);
+		background-color: rgb(200,200,200);
 	}
 	.window:nth-child(2n + 1){
 		clear:left;
 	}
 
 		.window .sub {
-			background-color: rgba(100,100,100, .6);
+			background-color: rgba(64,64,64, .6);
 			border-radius: 6px;
-			margin: 5px;
+			margin: 3px;
 			position: absolute;
 			background-repeat: no-repeat;
 			background-position: 5px 5px;

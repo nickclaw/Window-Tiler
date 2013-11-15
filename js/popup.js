@@ -138,8 +138,8 @@ function createIcon(layout) {
 		sub.classList.add('sub');
 		sub.style.left = calc(value.x, 0);
 		sub.style.top = calc(value.y, 0);
-		sub.style.width = calc(value.w, 10);
-		sub.style.height = calc(value.h, 10);
+		sub.style.width = calc(value.w, 6);
+		sub.style.height = calc(value.h, 6);
 
 		var selected = getSelectedTab(value.window);
 
@@ -218,7 +218,7 @@ function fillBody() {
 	});
 }
 
-// init
+/****************** INIT *****************/
 document.addEventListener('DOMContentLoaded', function () {
 	fillBody();
 });
