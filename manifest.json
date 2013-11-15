@@ -1,9 +1,14 @@
 {
   "manifest_version": 2,
+  "minimum_chromium_version": "33.0",
+  "offline_enabled": true,
 
   "name": "Window Tiler",
-  "description": "Quickly tile your windows.",
-  "version": "1.0.5",
+  "author": "Nicholas Clawson",
+  "description": "A chrome extension to quickly organize your windows.",
+  "version": "1.0.6",
+  "default_locale": "en",
+
   "permissions": ["tabs", "system.display"],
   "browser_action": {
     "default_icon": "image/icon.png",

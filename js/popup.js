@@ -21,7 +21,9 @@ function updateWindow(window, data) {
  * retrieves all screens, passes them to callback
  */
 function getScreens(callback) {
-	chrome.system.display.getInfo(callback);
+	chrome.system.display.getInfo(function(screens) {
+		callback(screens);
+	});
 }
 
 /** 
@@ -71,7 +73,10 @@ function getCurrentWindows(callback) {
 	getCurrentWindow(function(win){
 	    getScreen(win, function(scr){
 	        getScreenWindows(scr, function(windows) {
-	        	callback(windows);
+	        	windows = windows.filter(function(win) {
+	        		return win.state !== 'minimized';
+	        	});
+	        	callback(windows, scr);
 	        }); 
 	    });
 	});
@@ -120,7 +125,7 @@ function getClosest(object, options) {
 /**
  * Creates and returns a window icon with proper handling
  */
-function createIcon(data) {
+function createIcon(layout) {
 	var calc = function(n, margin) {
 		return 'calc(' + (n * 100) + '% - ' + margin + 'px )';
 	}
@@ -128,7 +133,7 @@ function createIcon(data) {
 	var element = document.createElement('div');
 	element.classList.add('window');
 
-	data.each(function(key, value) {
+	layout.each(function(key, value) {
 		var sub = document.createElement('div');
 		sub.classList.add('sub');
 		sub.style.left = calc(value.x, 0);
@@ -149,7 +154,7 @@ function createIcon(data) {
 	});
 
 	element.addEventListener('click', function(event) {
-		setWindows(data);
+		setWindows(layout, layout.screen);
 		window.close();
 	});
 
@@ -159,13 +164,13 @@ function createIcon(data) {
 /**
  * places the windows based off the given data
  */
-function setWindows(data) {
-	var top = screen.availTop;
-	var left = screen.availLeft;
-	var width = screen.availWidth;
-	var height = screen.availHeight;
+function setWindows(layout, currentScreen) {
+	var top = currentScreen.workArea.top;
+	var left = currentScreen.workArea.left;
+	var width = currentScreen.workArea.width;
+	var height = currentScreen.workArea.height;
 
-	data.each(function(key, value) {
+	layout.each(function(key, value) {
 		updateWindow(value.window, {
 			'left': Math.floor(width * value.x) + left,
 			'top': Math.floor(height * value.y) + top,
@@ -183,27 +188,33 @@ function fillBody() {
 	var box = document.getElementById('content');
 
 	// get all windows on the current screen
-	getCurrentWindows(function(windows) {
+	getCurrentWindows(function(currentWindows, currentScreen) {
 
 		// for each window layout
-		options[windows.length].each(function(index, layoutOptions) {
+		var layouts = options[currentWindows.length];
+		if (layouts) {
+			layouts.each(function(index, layout) {
 
-			// make a copy so we can remove used ones for every icon
-			tempWindows = windows.slice(0);
+				// bind the current screen to the layout so we can use it later
+				layout.screen = currentScreen;
 
-			// for every sub window of a layout TODO: .each?
-			for (var i = 0; i < layoutOptions.length; i++) {
-				
-				// get closest window to center position and save it
-				defineCenter(layoutOptions[i]);
-				var closest = getClosest(layoutOptions[i], tempWindows);
-				tempWindows.remove(closest);
-				layoutOptions[i].window = closest;
-			}
+				// make a copy so we can remove used ones for every icon
+				tempWindows = currentWindows.slice(0);
 
-			// add icon to body
-			box.appendChild(createIcon(layoutOptions));
-		});
+				// for every sub window of a layout TODO: .each?
+				layout.each(function(index, sub) {
+					
+					// get closest window to center position and save it
+					defineCenter(sub);
+					var closest = getClosest(sub, tempWindows);
+					tempWindows.remove(closest);
+					sub.window = closest;
+				});
+
+				// add icon to body
+				box.appendChild(createIcon(layout));
+			});
+		}
 	});
 }
 
