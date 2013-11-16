@@ -19,16 +19,6 @@ function updateWindow(window, data) {
 	chrome.windows.update(window.id, data);
 }
 
-/** 
- * retrieves the currentlly selected window, passes it to callback
- */
-function getCurrentWindow(callback) {
-	chrome.windows.getCurrent({'populate': true}, function(currentWindow) {
-		defineCenter(currentWindow);
-		callback(currentWindow);
-	});
-}
-
 /**
  * retrieves all screens, passes them to callback
  */
@@ -45,6 +35,34 @@ function getScreens(callback) {
 
 
 /*************** HELPER FUNCTIONS ****************/
+
+function mostlyIn(win, screens) {
+	var maxArea = Number.MIN_VALUE;
+	var maxScreen = null;
+
+	var ax1 = win.left;
+	var ax2 = win.left + win.width;
+	var ay1 = win.top;
+	var ay2 = win.top + win.height;
+
+	screens.each(function(index, scr) {
+		var bx1 = scr.bounds.left;
+		var bx2 = scr.bounds.left + scr.bounds.width;
+		var by1 = scr.bounds.top;
+		var by2 = scr.bounds.top + scr.bounds.height;
+
+		var intersect = Math.max(0, Math.max(ax2, bx2) - Math.min(ax1, bx1)) * // width
+						Math.max(0, Math.max(ay2, by2) - Math.min(ay1, by1));  // height
+
+
+		if (intersect >= maxArea) {
+			maxArea = intersect;
+			maxScreen = scr;
+		}
+	});
+
+	return maxScreen;
+}
 
 /** 
  * returns the tab with focus in a window
@@ -91,25 +109,33 @@ function createIcon(layout, currentScreen) {
 	var element = document.createElement('div');
 	element.classList.add('window');
 
+	// for each window position of the layotu
 	layout.each(function(key, value) {
+
+		// create div
 		var sub = document.createElement('div');
 		sub.classList.add('sub');
+
+		//set position
 		sub.style.left = calc(value.x, 0);
 		sub.style.top = calc(value.y, 0);
 		sub.style.width = calc(value.w, 6);
 		sub.style.height = calc(value.h, 6);
 
-		var selected = getSelectedTab(value.window);
-
-		if (selected) {
-			if (selected.favIconUrl) {
-				sub.style.backgroundImage = 'url('+ selected.favIconUrl +')';
-			}
-			sub.setAttribute('title', selected.title);
+		// set info about selected tab
+		var selected = value.window.tabs.filter(function(tab) {
+			return tab.selected;
+		})[0];
+		if (selected.favIconUrl) {
+			sub.style.backgroundImage = 'url('+ selected.favIconUrl +')';
 		}
+		sub.setAttribute('title', selected.title);
 
+
+		// add to window
 		element.appendChild(sub);
 	});
+
 
 	element.addEventListener('click', function(event) {
 		setWindows(layout, currentScreen);

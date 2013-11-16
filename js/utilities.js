@@ -1,15 +1,6 @@
 /***************** UTILITIES ******************/
 
 /**
- * returns true if the point is within the bounds
- * point must have x and y properties, bounds must have top, left, width, and height
- */
-function inBounds(point, bounds) {
-	return 	( (point.x > bounds.left) && (point.x < bounds.left + bounds.width ) ) && 	// horizontal
-			( (point.y > bounds.top ) && (point.y < bounds.top  + bounds.height) );		// vertical
-}
-
-/**
  * find the center of an object and sets it as a property of the object
  * object must have a defined left/x, top/y, width/w, and height/h
  */
