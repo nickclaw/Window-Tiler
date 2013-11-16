@@ -64,20 +64,6 @@ function mostlyIn(win, screens) {
 	return maxScreen;
 }
 
-/** 
- * returns the tab with focus in a window
- */
-function getSelectedTab(targetWindow) {
-	var selected = targetWindow.tabs.filter(function(tab) {
-		return tab.selected;
-	});
-	if (selected.length > 0) {
-		return selected[0];
-	} else {
-		return null;
-	}
-}
-
 /**
  * places the windows based off the given data
  */

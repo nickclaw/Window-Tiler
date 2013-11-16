@@ -7,7 +7,33 @@
 	display:none;
 }
 
+#side {
+	position:absolute;
+	left: 0px;
+	top: 0px;
+	width: 65px;
+	height: calc(100% - 20px);
+	margin: 10px;
+	border-radius: 6px;
+}
+
+	 #side .button {
+	 	background-color: rgb(220,220,220);
+		width: calc(100% - 6px);
+		height: calc(25% - 6px);
+		float: right;
+		clear: both;
+		margin: 3px;
+		border-radius: 6px;
+		cursor: pointer;
+	 }
+
+	 #side .button:hover {
+	 	background-color: rgb(200,200,200);
+	 }
+
 #content {
+	padding-left: 75px;
 	width: 280px;
 	height: 280px;
 	margin: 5px;
