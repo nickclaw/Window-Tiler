@@ -1,0 +1,15 @@
+#side .button {
+	-webkit-mask-size: contain;
+}
+
+#implode {
+	-webkit-mask-image: url(/image/implode.png);
+}
+
+#explode {
+	-webkit-mask-image: url(/image/explode.png);
+}
+
+#help {
+	-webkit-mask-image: url(/image/help.png);
+}

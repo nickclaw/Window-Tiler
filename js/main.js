@@ -17,7 +17,7 @@ function Manager(layoutOptions, container) {
 			var layouts = self.getLayouts(windows);
 
 			if (layouts.length === 0) {
-				self.error("We don't support "+windows.length+" windows yet. Sorry!", "?");
+				self.error("We don't support "+windows.length+" windows yet. Sorry!", "X");
 			} else {
 
 				// we have all the variables!!
@@ -72,7 +72,13 @@ function Manager(layoutOptions, container) {
 					'focused': true
 				});
 			}
+		});
 
+		document.getElementById('help').addEventListener('click', function() {
+			chrome.tabs.create({
+				'url': 'info.html',
+				'active': true
+			});
 		});
 	}
 
