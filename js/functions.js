@@ -107,10 +107,10 @@ function pairLayouts(layouts, windows) {
  * Creates a basic layout for n amount of screens
  */
  function createBasicLayout(n, windows) {
- 	var width = .7;
- 	var height = .7;
- 	var leftOffset = (1 - width)/n;
- 	var topOffset = (1 - height)/n;
+ 	var width = .9;
+ 	var height = .8;
+ 	var leftOffset = (1 - width)/Math.max(n - 1, 1);
+ 	var topOffset = (1 - height)/Math.max(n - 1, 1);
 
  	var layout  = [];
 
@@ -161,7 +161,7 @@ function createIcon(layout, currentScreen) {
 			if (selected[0].favIconUrl) {
 				sub.style.backgroundImage = 'url('+ selected[0].favIconUrl +')';
 			}
-			sub.setAttribute('title', selected.title);
+			sub.setAttribute('title', selected[0].title);
 		}
 
 
