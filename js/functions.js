@@ -84,6 +84,51 @@ function setWindows(layout, currentScreen) {
 	});
 }
 
+/** 
+ * Pairs the layout windows to browser windows
+ */
+function pairLayouts(layouts, windows) {
+	layouts.each(function(index, layout) {
+
+		var tempWindows = windows.slice(0);
+
+		// define the center of each layout window and
+		// pair each layout window to closest browser window
+		layout.each(function(i, sub) {
+			defineCenter(sub);
+			sub.window = tempWindows.remove(getClosest(sub, tempWindows))[0];
+		});
+	});
+
+	return layouts;
+}
+
+/**
+ * Creates a basic layout for n amount of screens
+ */
+ function createBasicLayout(n, windows) {
+ 	var width = .7;
+ 	var height = .7;
+ 	var leftOffset = (1 - width)/n;
+ 	var topOffset = (1 - height)/n;
+
+ 	var layout  = [];
+
+ 	for (var i = 0; i < n; i++) {
+ 		layout[i] = {
+ 			'x': leftOffset * i,
+ 			'y': topOffset * i,
+ 			'w': width,
+ 			'h': height
+ 		};
+ 		defineCenter(windows[i]);
+ 	}
+
+ 	pairLayouts([layout], windows)
+
+ 	return layout;
+ }
+
 /**
  * Creates and returns a window icon with proper handling
  */
@@ -95,9 +140,8 @@ function createIcon(layout, currentScreen) {
 	var element = document.createElement('div');
 	element.classList.add('window');
 
-	// for each window position of the layotu
+	// for each window position of the layout
 	layout.each(function(key, value) {
-
 		// create div
 		var sub = document.createElement('div');
 		sub.classList.add('sub');
@@ -111,11 +155,14 @@ function createIcon(layout, currentScreen) {
 		// set info about selected tab
 		var selected = value.window.tabs.filter(function(tab) {
 			return tab.selected;
-		})[0];
-		if (selected.favIconUrl) {
-			sub.style.backgroundImage = 'url('+ selected.favIconUrl +')';
+		});
+
+		if (selected) {
+			if (selected[0].favIconUrl) {
+				sub.style.backgroundImage = 'url('+ selected[0].favIconUrl +')';
+			}
+			sub.setAttribute('title', selected.title);
 		}
-		sub.setAttribute('title', selected.title);
 
 
 		// add to window

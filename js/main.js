@@ -17,7 +17,7 @@ function Manager(layoutOptions, container) {
 			var layouts = self.getLayouts(windows);
 
 			if (layouts.length === 0) {
-				self.error("We don't support "+windows.length+" windows yet. Sorry!", "X");
+				self.error("We don't fully support "+windows.length+" windows yet. Sorry!", "X", createBasicLayout(windows.length, windows));
 			} else {
 
 				// we have all the variables!!
@@ -87,26 +87,26 @@ function Manager(layoutOptions, container) {
 
 		// if not undefined
 		if (layouts) {
-			layouts.each(function(index, layout) {
-
-				var tempWindows = windows.slice(0);
-
-				// define the center of each layout window and
-				// pair each layout window to closest browser window
-				layout.each(function(i, sub) {
-					defineCenter(sub);
-					sub.window = tempWindows.remove(getClosest(sub, tempWindows))[0];
-				});
-			});
+			pairLayouts(layouts, windows);
 		}
 		
 		// at the very least return an array
 		return layouts?layouts:[];
 	}
 
-	self.error = function(message, symbol) {
+	self.error = function(message, symbol, layout) {
 		self.container.classList.add('error');
-		self.container.innerHTML = '<h2>whoops</h2><div class="window">'+symbol+'</div><p>'+message+'</p>';
+		var title = document.createElement('h2');
+		title.innerHTML = 'whoops';
+
+		var icon = createIcon(layout, self.currentScreen);
+
+		var para = document.createElement('p');
+		para.innerHTML = message;
+
+		self.container.appendChild(title);
+		self.container.appendChild(icon);
+		self.container.appendChild(para);
 	}
 
 	self.init = function() {
