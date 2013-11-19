@@ -160,7 +160,8 @@ var Drawer = {
 			}
 
 			chrome.runtime.sendMessage(
-				{
+				{	
+					'message': 'layout',
 					'layouts': layouts
 				}
 			);
@@ -310,7 +311,8 @@ function Manager() {
 					
 					// create window objects
 					for (var i = 0, win = null; win = windows[i]; i++) {
-						if (win.status !== 'minimized') {
+						console.log(win);
+						if (win.state !== 'minimized') {
 							var winObject = new Window(win);
 							findScreenForWindow(winObject, self.screens);
 
@@ -325,10 +327,18 @@ function Manager() {
 					}
 
 
-					// make sure everything looks good then
-					// prepare the layouts and make sure they are good
-					if ( self.initCheck() && self.prepareLayouts() ) {
-						Drawer.fillBody(self.layouts);
+					// make sure everything was initialized right
+					if ( self.initCheck() ) {
+
+						// register buttons
+						self.registerButtons();
+
+						// prepare layouts
+						if ( self.prepareLayouts() ) {
+
+							// draw if necessary
+							Drawer.fillBody(self.layouts);
+						}
 					}
 				});
 			})
@@ -359,6 +369,43 @@ function Manager() {
 		return true;
 	}
 
+	this.registerButtons = function () {
+		document.getElementById('implode').addEventListener('click', function() {
+			var currentWindows = self.currentScreen.windows;
+			var currentWindow = self.currentWindow;
+
+			console.log('uhoh');
+
+			// get array of all tab ids
+			var tabs = [];
+			for(var i = 0, win = null; win = currentWindows[i]; i++) {
+				if (win.data.id !== currentWindow.data.id) {
+					tabs = tabs.concat(win.data.tabs.map(function(tab) {
+						return tab.id;
+					}));
+				}
+			}
+			chrome.runtime.sendMessage({
+				'message': 'implode',
+				'id': currentWindow.data.id,
+				'tabs': tabs
+			});
+
+			window.close();
+		});
+
+		document.getElementById('explode').addEventListener('click', function() {
+			chrome.runtime.sendMessage({
+				'message': 'explode',
+				'tabs': self.currentWindow.data.tabs.map(function(tab) {
+					return tab.id;
+				})
+			});
+
+			window.close();
+		});
+	}
+
 	/**
 	 * Gathers the right layouts, matches them to windows
 	 */
@@ -384,30 +431,4 @@ function Manager() {
 
 window.addEventListener('DOMContentLoaded', function() {
 	new Manager().init();
-
-	document.getElementById('implode').addEventListener('click', function() {
-		
-		window.close();
-	});
-
-	document.getElementById('explode').addEventListener('click', function(currentWindow) {
-		chrome.windows.getCurrent({'populate':true}, function(currentWindow) {
-			for(var i = 1; i < currentWindow.tabs.length; i++) {
-				chrome.windows.create({
-					'tabId': currentWindow.tabs[i].id,
-					'type': 'normal',
-					'focused': true
-				});
-			}
-
-			window.close();
-		});
-	});
-	document.getElementById('help').addEventListener('click', function() {
-		chrome.tabs.create({
-			'url': 'info.html',
-			'active': true
-		});
-		window.close();
-	});
 });

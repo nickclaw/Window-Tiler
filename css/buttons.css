@@ -1,6 +1,7 @@
 .button {
 	-webkit-mask-size: contain;
 	background-size: contain;
+	display:block;
 }
 
 #implode {
