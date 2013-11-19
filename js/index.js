@@ -303,32 +303,35 @@ function Manager() {
 				self.screens.push(new Screen(scr));
 			}
 
-			// get all windows
-			chrome.windows.getAll({'populate':true}, function(windows) {
-				
-				// create window objects
-				for (var i = 0, win = null; win = windows[i]; i++) {
-					if (win.status !== 'minimized') {
-						var winObject = new Window(win);
-						findScreenForWindow(winObject, self.screens);
+			chrome.windows.getCurrent({'populate':true}, function(currentWindow) {
 
-						// store currently selected windows and screens
-						if (winObject.isSelected()) {
-							self.currentWindow = winObject;
-							self.currentScreen = winObject.screen;
+				// get all windows
+				chrome.windows.getAll({'populate':true}, function(windows) {
+					
+					// create window objects
+					for (var i = 0, win = null; win = windows[i]; i++) {
+						if (win.status !== 'minimized') {
+							var winObject = new Window(win);
+							findScreenForWindow(winObject, self.screens);
+
+							// store currently selected windows and screens
+							if (winObject.data.id === currentWindow.id) {
+								self.currentWindow = winObject;
+								self.currentScreen = winObject.screen;
+							}
+
+							self.windows.push(winObject);	
 						}
-
-						self.windows.push(winObject);	
 					}
-				}
 
 
-				// make sure everything looks good then
-				// prepare the layouts and make sure they are good
-				if ( self.initCheck() && self.prepareLayouts() ) {
-					Drawer.fillBody(self.layouts);
-				}
-			});
+					// make sure everything looks good then
+					// prepare the layouts and make sure they are good
+					if ( self.initCheck() && self.prepareLayouts() ) {
+						Drawer.fillBody(self.layouts);
+					}
+				});
+			})
 		});
 	}
 
@@ -338,15 +341,21 @@ function Manager() {
 	 * there is a problem and displays an appropriate error
 	 */
 	this.initCheck = function () {
-		if (!self.currentScreen && self.screens.length > 1) {
-			Drawer.error('whoops', 'Your version of Chrome doesn\'t support multiple screens yet. Sorry!', '?');
-			return false;
-		}
-
-		if (!self.currentScreen || !self.currentWindow) {
+		if (!self.currentWindow) {
 			Drawer.error('whoops', 'It looks like there was an error. Sorry!', 'X');
 			return false;
 		}
+
+		if (!self.currentScreen && self.screens.length > 1) {
+			Drawer.error('whoops', 'Your version of Chrome doesn\'t support multiple screens yet. Sorry!', '!');
+			return false;
+		}
+
+		if (!self.currentScreen) {
+			Drawer.error('whoops', 'This shouldn\'t have happened. Sorry!', '#');
+			return false;
+		}
+
 		return true;
 	}
 
@@ -365,7 +374,7 @@ function Manager() {
 
 		// if there is only one layout / number of windows is unsupported
 		if (self.layouts.length === 1) {
-			Drawer.singleLayout(self.layouts[0], 'whoops', "We don't support " + self.layouts[0].length + " windows yet. Sorry!");
+			Drawer.singleLayout(self.layouts[0], 'whoops', "We don't fully support " + self.layouts[0].length + " windows yet. Sorry!");
 			return false;
 		}
 
