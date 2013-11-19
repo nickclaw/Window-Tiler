@@ -96,8 +96,95 @@ var LayoutManager = {
 					closestWindow = win;
 				}
 			}
-			sub.window = windows.remove(closestWindow);
+			sub.window = windows.remove(closestWindow)[0];
 		}
+	}
+}
+
+var Drawer = {
+	'fillBody': function(layouts) {
+		var content = document.getElementById('content');
+		for (var i = 0; i < layouts.length; i++) {
+			content.appendChild(this.createIcon(layouts[i]));
+		}
+	},
+
+	'createIcon': function(layout) {
+		var calc = function(n, margin) {
+			return 'calc(' + (n * 100) + '% - ' + margin + 'px )';
+		}
+		var icon = document.createElement('div');
+		icon.classList.add('window');
+
+		for (var i = 0, sub = null; sub = layout[i]; i++) {
+			var win = document.createElement('div');
+			win.classList.add('sub');
+
+			win.style.left = calc(sub.x, 0);
+			win.style.top = calc(sub.y, 0);
+			win.style.width = calc(sub.w, 6);
+			win.style.height = calc(sub.h, 6);
+
+			var selected = sub.window.getSelectedTab();
+			if (selected) {
+				win.setAttribute('title', selected.title);
+				if (selected.favIconUrl) {
+					win.style.backgroundImage = 'url('+selected.favIconUrl+')';
+				}
+			}
+
+			icon.appendChild(win);
+		}
+
+		this.addListener(icon, layout);
+
+		return icon;
+	},
+
+	'addListener': function(element, layout) {
+		element.addEventListener('click', function() {
+			var dim = layout[0].window.screen.getWorkspace();
+
+			for (var i = 0, sub = null; sub = layout[i]; i++) {
+				chrome.windows.update(sub.window.data.id, {
+					'left': Math.floor(sub.x * dim.w + dim.x),
+					'top': Math.floor(sub.y * dim.h + dim.y),
+					'width': Math.floor(sub.w * dim.w),
+					'height': Math.floor(sub.h * dim.h),
+					'focused': true
+				});
+			}
+		});
+	},
+
+	'singleLayout': function(layout, title, message, iconSymbol) {
+		var content = document.getElementById('content');
+		content.classList.add('error');
+
+		var header = document.createElement('h2');
+		var para = document.createElement('p');
+		var icon;
+
+		header.innerHTML = title;
+		para.innerHTML = message;
+
+
+		if (iconSymbol) {
+			icon = document.createElement('div');
+			icon.classList.add('window');
+			icon.innerHTML = iconSymbol;
+		} else {
+		 	icon = this.createIcon(layout);
+		}
+
+
+		content.appendChild(header);
+		content.appendChild(icon);
+		content.appendChild(para);
+	},
+
+	'error': function(title, message, symbol) {
+		this.singleLayout(null, title, message, symbol);
 	}
 }
 
@@ -187,6 +274,7 @@ function Manager() {
 	this.screens = [];
 	this.currentWindow = null;
 	this.currentScreen = null;
+	this.layouts = [];
 
 	/** 
 	 * Query the system for information about windows and
@@ -202,7 +290,6 @@ function Manager() {
 			for (var i = 0, scr = null; scr = screens[i]; i++) {
 				self.screens.push(new Screen(scr));
 			}
-
 
 			// get all windows
 			chrome.windows.getAll({'populate':true}, function(windows) {
@@ -223,50 +310,11 @@ function Manager() {
 					}
 				}
 
+
 				// make sure everything looks good then
 				// prepare the layouts and make sure they are good
 				if ( self.initCheck() && self.prepareLayouts() ) {
-
-					// display layouts
-					var container = document.getElementById('content');
-					var calc = function(n, margin) {
-						return 'calc(' + (n * 100) + '% - ' + margin + 'px )';
-					}
-
-					// for each layout
-					// for (var i = 0; i < self.currentScreen.windows[0].layouts.length; i++) {
-					// 	var icon = document.createElement('div');
-					// 	icon.classList.add('window');
-
-					// 	// go through each window and grab the right sublayout
-					// 	for (var j = 0, win = null; win = self.currentScreen.windows[j]; j++) {
-					// 		var sub = document.createElement('div');
-					// 		sub.classList.add('sub');
-					// 		var value = win.layouts[i];
-
-					// 		sub.style.left = calc(value.x, 0);
-					// 		sub.style.top = calc(value.y, 0);
-					// 		sub.style.width = calc(value.w, 6);
-					// 		sub.style.height = calc(value.h, 6);
-
-					// 		var selected = win.getSelectedTab();
-					// 		if (selected) {
-					// 			sub.setAttribute('title', selected.title);
-					// 			if (selected.favIconUrl) {
-					// 				sub.style.backgroundImage = 'url('+selected.favIconUrl+')';
-					// 			}
-					// 		}
-
-					// 		icon.appendChild(sub);
-					// 	}
-
-					// 	icon.addEventListener('click', function(event) {
-
-					// 		window.close();
-					// 	});
-
-					// 	container.appendChild(icon);
-					// }
+					Drawer.fillBody(self.layouts);
 				}
 			});
 		});
@@ -278,6 +326,16 @@ function Manager() {
 	 * there is a problem and displays an appropriate error
 	 */
 	this.initCheck = function () {
+		if (!self.currentScreen && self.screens.length > 1) {
+			Drawer.error('whoops', 'Your version of Chrome doesn\'t support multiple screens yet. Sorry!', '?');
+			return false;
+		}
+
+		if (!self.currentScreen || !self.currentWindow) {
+			Drawer.error('whoops', 'It looks like there was an error. Sorry!', 'X');
+			return false;
+		}
+
 		return true;
 	}
 
@@ -286,17 +344,18 @@ function Manager() {
 	 */
 	this.prepareLayouts = function () {
 		// get layouts
-		var layouts = LayoutManager.getLayouts(self.currentScreen.windows.length);
+
+		self.layouts = LayoutManager.getLayouts(self.currentScreen.windows.length);
 
 		// add layouts to windows
-		for (var i = 0; i < layouts.length; i++) {
-			LayoutManager.pairLayoutToWindows(layouts[i], self.currentScreen.windows);
+		for (var i = 0; i < self.layouts.length; i++) {
+			LayoutManager.pairLayoutToWindows(self.layouts[i], self.currentScreen.windows);
 		}
 
 		// if there is only one layout / number of windows is unsupported
-		if (layouts.length === 1) {
-
-			// return false;
+		if (self.layouts.length === 1) {
+			Drawer.singleLayout(self.layouts[0], 'whoops', "We don't support " + self.layouts[0].length + " windows yet. Sorry!");
+			return false;
 		}
 
 		return true;
@@ -304,43 +363,31 @@ function Manager() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
-	var manager = new Manager();
-	manager.init();
+	new Manager().init();
+
 	document.getElementById('implode').addEventListener('click', function() {
-		var currentScreen = manager.currentScreen;
-		var currentWindow = manager.currentWindow;
-		var tabs = [];
-
-		// get all tabs
-		for (var i = 0, win = null; win = currentScreen.windows[i]; i++) {
-			if (win !== currentWindow) {
-				tabs = tabs.concat(win.tabs);
-			}
-		}
-			
-		// create array of tab ids
-		var tabIds = tabs.map(function(tab) {
-			return tab.id;
-		});	
-
-		// move all tabs to new windows
-		chrome.tabs.move(tabIds, {
-			'windowId': currentWindow.id,
-			'index': -1
-		});	
-
-		// maximize the one window to make sure it fits nicely in screen
-		chrome.windows.update(currentWindow.id, {
-			'state': 'maximized'
-		});
-
+		
 		window.close();
 	});
-	document.getElementById('explode').addEventListener('click', function() {
 
+	document.getElementById('explode').addEventListener('click', function(currentWindow) {
+		chrome.windows.getCurrent({'populate':true}, function(currentWindow) {
+			for(var i = 1; i < currentWindow.tabs.length; i++) {
+				chrome.windows.create({
+					'tabId': currentWindow.tabs[i].id,
+					'type': 'normal',
+					'focused': true
+				});
+			}
+
+			window.close();
+		});
 	});
-
 	document.getElementById('help').addEventListener('click', function() {
-
+		chrome.tabs.create({
+			'url': 'info.html',
+			'active': true
+		});
+		window.close();
 	});
 });
