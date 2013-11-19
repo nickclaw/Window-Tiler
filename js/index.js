@@ -7,6 +7,16 @@ Array.prototype.remove = function(object) {
 	return this.splice(this.indexOf(object), 1);
 }
 
+function createCallback(limit, callback) {
+	var completed = 0;
+	return function() {
+		completed++;
+		if (completed === limit) {
+			callback();
+		}
+	}
+}
+
 function findScreenForWindow(win, screens) {
 	var maxArea = Number.MIN_VALUE;
 	var bestFit = null;
@@ -142,17 +152,23 @@ var Drawer = {
 	},
 
 	'addListener': function(element, layout) {
+
+		// create a callback that will only run
+		// after every layout has been set
+		var callback = createCallback(layout.length, function() {
+			window.close();
+		});
+
 		element.addEventListener('click', function() {
 			var dim = layout[0].window.screen.getWorkspace();
-
 			for (var i = 0, sub = null; sub = layout[i]; i++) {
 				chrome.windows.update(sub.window.data.id, {
 					'left': Math.floor(sub.x * dim.w + dim.x),
 					'top': Math.floor(sub.y * dim.h + dim.y),
 					'width': Math.floor(sub.w * dim.w),
-					'height': Math.floor(sub.h * dim.h),
-					'focused': true
-				});
+					'height': Math.floor(sub.h * dim.h)
+					// TODO find a way to call focus without stopping the script
+				}, callback);
 			}
 		});
 	},
@@ -335,7 +351,6 @@ function Manager() {
 			Drawer.error('whoops', 'It looks like there was an error. Sorry!', 'X');
 			return false;
 		}
-
 		return true;
 	}
 
