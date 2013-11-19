@@ -1,5 +1,6 @@
-#side .button {
+.button {
 	-webkit-mask-size: contain;
+	background-size: contain;
 }
 
 #implode {
@@ -12,4 +13,12 @@
 
 #help {
 	-webkit-mask-image: url(/image/help.png);
+}
+
+#github {
+	background-image: url(/image/github.png);
+}
+
+#email {
+	background-image: url(/image/mail.png);
 }
