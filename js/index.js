@@ -7,16 +7,6 @@ Array.prototype.remove = function(object) {
 	return this.splice(this.indexOf(object), 1);
 }
 
-function createCallback(limit, callback) {
-	var completed = 0;
-	return function() {
-		completed++;
-		if (completed === limit) {
-			callback();
-		}
-	}
-}
-
 function findScreenForWindow(win, screens) {
 	var maxArea = Number.MIN_VALUE;
 	var bestFit = null;
@@ -151,25 +141,31 @@ var Drawer = {
 		return icon;
 	},
 
-	'addListener': function(element, layout) {
-
-		// create a callback that will only run
-		// after every layout has been set
-		var callback = createCallback(layout.length, function() {
-			window.close();
-		});
-
+	'addListener': function(element, layout) {	
 		element.addEventListener('click', function() {
-			var dim = layout[0].window.screen.getWorkspace();
+			var layouts = [];
 			for (var i = 0, sub = null; sub = layout[i]; i++) {
-				chrome.windows.update(sub.window.data.id, {
-					'left': Math.floor(sub.x * dim.w + dim.x),
-					'top': Math.floor(sub.y * dim.h + dim.y),
-					'width': Math.floor(sub.w * dim.w),
-					'height': Math.floor(sub.h * dim.h)
-					// TODO find a way to call focus without stopping the script
-				}, callback);
+				var dim = layout[0].window.screen.getWorkspace();
+
+				layouts.push({
+					'id':  sub.window.data.id,
+					'settings': {
+						'left': Math.floor(sub.x * dim.w + dim.x),
+						'top': Math.floor(sub.y * dim.h + dim.y),
+						'width': Math.floor(sub.w * dim.w),
+						'height': Math.floor(sub.h * dim.h),
+						'focused': true
+					}
+				});
 			}
+
+			chrome.runtime.sendMessage(
+				{
+					'layouts': layouts
+				}
+			);
+
+			window.close();		
 		});
 	},
 
