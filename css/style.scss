@@ -1,0 +1,105 @@
+@import "buttons.scss";
+@mixin absolute($top, $left) {
+	position: absolute;
+	top: $top;
+	left: $left;
+}
+
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+::-webkit-scrollbar {
+	display: none;
+}
+
+$contentSize: 280px;
+
+$contentMargin: 5px;
+$windowMargin: 5px;
+$sideMargin: 5px; 
+$buttonMargin: 3px;
+
+#side {
+	@include absolute(0px, 0px);
+	width: $contentSize/4;
+	margin: $sideMargin;
+	height: $contentSize/4 - 2*$sideMargin;
+
+	.button:hover {
+		background-color: rgb(200,200,200);
+	}
+	.button {
+		float:right;
+		clear:both;
+		cursor: pointer;
+		background-color:rgb(220,220,220);
+
+		width: $contentSize/4 - $buttonMargin*2;
+		height: $contentSize/4 - $buttonMargin*2;
+		margin: $buttonMargin;
+	}
+}
+
+#content {
+	font-family: sans-serif;
+	padding-left: $contentSize/4 + $sideMargin;
+	overflow-x:scroll;
+
+	width: $contentSize;
+	height: $contentSize;
+	margin: $contentMargin;
+
+	.window:hover {
+		background-color:rgb(200,200,200);
+	}
+	.window:nth-child(2n+1) {
+		clear:left;
+	}
+	.window {
+		background-color: rgb(220,220,220);
+		border-radius: 6px;
+		float:right;
+		cursor: pointer;
+		position: relative;
+
+		width: $contentSize/2 - $windowMargin*2;
+		height: $contentSize/2 - $windowMargin*2;
+		margin: $windowMargin;
+
+		.sub {
+			background-color: rgba(64,64,64,.6);
+			border-radius: 6px;
+			margin: 3px;
+			position: absolute;
+			background: {
+				repeat: no-repeat;
+				position: 5px 5px;
+				size: 20px 20px;
+				image: url(../image/favicon.png);
+			}
+		}
+	}
+}
+
+#content.error {
+	text-align: center;
+	color: rgba(64,64,64,.6);
+
+	h2 {
+		font-size: 35pt;
+	}
+
+	.window {
+		margin: 20px auto;
+		text-align: inherit;
+		font-size: 120pt;
+		line-height: 100pt;
+		float:none;
+	}
+
+	p {
+		padding: 10px;
+	}
+}
