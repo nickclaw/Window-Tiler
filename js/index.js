@@ -128,7 +128,9 @@ var Drawer = {
 			var selected = sub.window.getSelectedTab();
 			if (selected) {
 				win.setAttribute('title', selected.title);
-				if (selected.favIconUrl) {
+				if (selected.incognito) {
+					win.style.backgroundImage = 'url(image/incognito.png)';
+				} else if (selected.favIconUrl && selected.favIconUrl.indexOf('chrome://') !== 0) {
 					win.style.backgroundImage = 'url('+selected.favIconUrl+')';
 				}
 			}

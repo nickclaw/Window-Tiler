@@ -14,8 +14,8 @@
 	display: none;
 }
 
+// MAKE SURE TO CHANGE STYLE IN popup.html IF YOU CHANGE ANY OF THESE
 $contentSize: 280px;
-
 $contentMargin: 5px;
 $windowMargin: 5px;
 $sideMargin: 5px; 
@@ -25,7 +25,6 @@ $buttonMargin: 3px;
 	@include absolute(0px, 0px);
 	width: $contentSize/4;
 	margin: $sideMargin;
-	height: $contentSize/4 - 2*$sideMargin;
 
 	.button:hover {
 		background-color: rgb(200,200,200);

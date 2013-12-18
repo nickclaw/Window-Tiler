@@ -3,6 +3,18 @@
 	<head>
 		<title>Window Resizer</title>
 		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<style>
+			/*
+			 * force popup window to be correct size
+			 * fixes bug where popup size is set before css has time to load
+			 * height  =  $contentSize
+			 * width   =  ( 5 / 4 * $contentSize ) + $sideMargin + $contentMargin * 2
+			 */
+			body {
+				width: 365px;
+				height: 280px;
+			}
+		</style>
 		<script src="options.json"></script>
 		<script src="js/index.js"></script>
 	</head>
