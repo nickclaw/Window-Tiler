@@ -3,6 +3,7 @@
 /**
  * remove and return the given object from the array
  * @param {*} object the object to remove
+ * @this {Array.<*>}
  */
 Array.prototype.remove = function(object) {
 	return this.splice(this.indexOf(object), 1);
@@ -17,14 +18,11 @@ function findScreenForWindow(win, screens) {
 	var maxArea = Number.MIN_VALUE;
 	var bestFit = null;
 
-	var winDim = win.getBounds();
+	var winBounds = win.getBounds();
 
 	for (var i = 0, scr = null; scr = screens[i]; i++) {
 
-		/** @type {Object} */
-		var scrDim = scr.getBounds();
-		var intersect = Math.max(0, Math.min(winDim.x + winDim.w, scrDim.x + scrDim.w) - Math.max(winDim.x, scrDim.x)) *
-						Math.max(0, Math.min(winDim.y + winDim.h, scrDim.y + scrDim.h) - Math.max(winDim.y, scrDim.y));
+		var intersect = winBounds.getOverlap(scr.getBounds());
 
 		if (intersect > maxArea) {
 			maxArea = intersect;
@@ -47,7 +45,7 @@ var LayoutManager = {
 	/**
 	 * gets the valid layouts for 'n' windows
 	 * @param {number} n the number of windows
-	 * @return {Array.<Array.<Object>>}
+	 * @return {Array.<Array.<Bounds>>}
 	 */
 	'getLayouts': function (n) {
 		if (options[n]) {
@@ -55,16 +53,7 @@ var LayoutManager = {
 			for (var i = 0; i < options[n].length; i++) {
 				var layout = [];
 				for (var j = 0; j < options[n][i].length; j++) {
-					layout[layout.length] = {
-						x : options[n][i][j].x,
-						y : options[n][i][j].y,
-						h : options[n][i][j].h,
-						w : options[n][i][j].w,
-						center: {
-							x : Math.floor(options[n][i][j].x + options[n][i][j].w / 2),
-							y : Math.floor(options[n][i][j].y + options[n][i][j].h / 2)
-						}
-					}
+					layout[layout.length] = new Bounds(options[n][i][j]);
 				}
 				layouts[layouts.length] = layout;
 			}
@@ -77,7 +66,7 @@ var LayoutManager = {
 	/**
 	 * creates a single layout given any number of windows
 	 * @param {number} n the number of windows
-	 * @return {Array.<Object>}
+	 * @return {Array.<Bounds>}
 	 */
 	'createBasicLayout': function (n) {
 		var width = .9;
@@ -106,7 +95,7 @@ var LayoutManager = {
 	/**
 	 * takes a layout and array of windows, matches each window to the closest layout window
 	 *
-	 * @param {Array.<Object>} layout
+	 * @param {Array.<Bounds>} layout
 	 * @param {Array.<WindowObject>} wins
 	 */
 	'pairLayoutToWindows': function (layout, wins) {
@@ -150,7 +139,7 @@ var Drawer = {
 
 	/**
 	 * fills the #content box with an icon of each layout
-	 * @param {Array.<Array.<Object>>} layouts
+	 * @param {Array.<Array.<Bounds>>} layouts
 	 */
 	'fillBody': function(layouts) {
 		var content = document.getElementById('content');
@@ -161,7 +150,7 @@ var Drawer = {
 
 	/**
 	 * creates the html icon for a layout
-	 * @param {Array.<Object>} layout
+	 * @param {Array.<Bounds>} layout
 	 * @return {Element}
 	 */
 	'createIcon': function(layout) {
@@ -201,7 +190,7 @@ var Drawer = {
 	/**
 	 * adds a click listener to an element, handles sending layout to background.js for window setting
 	 * @param {Element} element
-	 * @param {Array.<Object>} layout
+	 * @param {Array.<Bounds>} layout
 	 */
 	'addListener': function(element, layout) {	
 		element.addEventListener('click', function() {
@@ -223,8 +212,8 @@ var Drawer = {
 
 			chrome.runtime.sendMessage(
 				{	
-					message : 'layout',
-					layouts : layouts
+					"message" : 'layout',
+					"layouts" : layouts
 				}
 			);
 
@@ -234,7 +223,7 @@ var Drawer = {
 
 	/**
 	 * creates a single layout setup with an optional message and symbol
-	 * @param {Array.<Object>} layout
+	 * @param {Array.<Bounds>} layout
 	 * @param {string} title
 	 * @param {string=} message
 	 * @param {string=} iconSymbol
@@ -269,6 +258,58 @@ var Drawer = {
 		Drawer.singleLayout(null, title, message, symbol);
 	}
 }
+
+/**
+ * represents a bounding box, has helper functions for dealing with
+ * distances and overlapping area, really only used to make the compiler cooperate
+ * @constructor
+ * @param {Object=} data
+ */
+function Bounds(data) {
+	console.log(data);
+	// the left and top offset	
+	/**
+	 * @type {number}
+	 * @expose
+	 */
+	this.x = data.x || data['x'] || 0;
+	/**
+	 * @type {number}
+	 * @expose
+	 */
+	this.y = data.y || data['y'] || 0;
+
+	// the width and height
+	/**
+	 * @type {number}
+	 * @expose
+	 */
+	this.w = data.w || data['w'] || 0;
+	/**
+	 * @type {number}
+	 * @expose
+	 */
+	this.h = data.h || data['h'] || 0;
+
+	/**
+	 * the center point
+	 * @type {{x:number, y:number}}
+	 * @expose
+	 */
+	this.center = {
+		x : Math.floor(this.x + this.w / 2),
+		y : Math.floor(this.y + this.h / 2)
+	}
+
+	/**
+	 * calculates the area of overlap between two bounds
+	 * @param {Bounds} bounds
+	 */
+	this.getOverlap = function(bounds) {
+		return Math.max(0, Math.min(this.x + this.w, bounds.x + bounds.w) - Math.max(this.x, bounds.x)) *
+						Math.max(0, Math.min(this.y + this.h, bounds.y + bounds.h) - Math.max(this.y, bounds.y));
+	}
+}
 	
 /**
  * encapsulates the data returned the chrome API representing
@@ -294,19 +335,15 @@ function WindowObject(data) {
 	/**
 	 * returns the windows dimensions
 	 * includes left/top offset, width/height, and center coordinates
-	 * @return {Object} the bounds of the window
+	 * @return {Bounds} the bounds of the window
 	 */
 	this.getBounds = function () {
-		return {
+		return new Bounds({
 			x : this.data.left,
 			y : this.data.top,
 			w : this.data.width,
-			h : this.data.height,
-			center : {
-				x : Math.floor(this.data.left + this.data.width/2),
-				y : Math.floor(this.data.top + this.data.height/2)
-			}
-		};
+			h : this.data.height
+		});
 	}
 
 	/**
@@ -355,37 +392,29 @@ function ScreenObject(data) {
 	/**
 	 * gets dimensions of workable screen space
 	 * includes left/top offset, width/height, and center coordinates
-	 * @return {Object} the bounds of the screen workspace
+	 * @return {Bounds} the bounds of the screen workspace
 	 */
 	this.getWorkspace = function () {
-		return {
-			x: this.data.workArea.left,
-			y: this.data.workArea.top,
-			w: this.data.workArea.width,
-			h: this.data.workArea.height,
-			center: {
-				x: Math.floor(this.data.workArea.left + this.data.workArea.width/2),
-				y: Math.floor(this.data.workArea.top + this.data.workArea.height/2)
-			}
-		};
+		return new Bounds({
+			x : this.data.workArea.left,
+			y : this.data.workArea.top,
+			w : this.data.workArea.width,
+			h : this.data.workArea.height
+		});
 	}
 
 	/**
 	 * gets the dimension of the screens bounds
 	 * includes left/top offset, width/height, and center coordinates
-	 * @return {Object} the bounds of the screens
+	 * @return {Bounds} the bounds of the screens
 	 */
 	this.getBounds = function () {
-		return {
-			x: this.data.bounds.left,
-			y: this.data.bounds.top,
-			w: this.data.bounds.width,
-			h: this.data.bounds.height,
-			center: {
-				x: Math.floor(this.data.bounds.left + this.data.bounds.width/2),
-				y: Math.floor(this.data.bounds.top + this.data.bounds.height/2)
-			}
-		};
+		return new Bounds({
+			x : this.data.bounds.left,
+			y : this.data.bounds.top,
+			w : this.data.bounds.width,
+			h : this.data.bounds.height
+		});
 	}
 }
 
@@ -422,7 +451,7 @@ function Manager() {
 
 	/**
 	 * an array of possible layouts
-	 * @type {Array.<Array.<Object>>}
+	 * @type {Array.<Array.<Bounds>>}
 	 */
 	this.layouts = [];
 
@@ -532,9 +561,9 @@ function Manager() {
 				}
 			}
 			chrome.runtime.sendMessage({
-				message : 'implode',
-				id : currentWindow.data.id,
-				tabs : tabs
+				"message" : 'implode',
+				"id" : currentWindow.data.id,
+				"tabs" : tabs
 			});
 
 			window.close();
@@ -542,8 +571,8 @@ function Manager() {
 
 		document.getElementById('explode').addEventListener('click', function() {
 			chrome.runtime.sendMessage({
-				message : 'explode',
-				tabs: self.currentWindow.data.tabs.map(function(tab) {
+				"message" : 'explode',
+				"tabs": self.currentWindow.data.tabs.map(function(tab) {
 					return tab.id;
 				})
 			});
