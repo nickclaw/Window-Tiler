@@ -6,7 +6,7 @@
   "name": "Window Tiler",
   "author": "Nicholas Clawson",
   "description": "A chrome extension to quickly organize your windows.",
-  "version": "1.1.0",
+  "version": "1.0.0",
 
   "permissions": ["tabs", "system.display"],
   "browser_action": {
